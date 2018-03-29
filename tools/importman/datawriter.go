@@ -32,6 +32,8 @@ type dataWriter struct {
 	done             chan struct{}
 	bardone          chan struct{}
 	streams          map[streamKey]*streamVal
+	tstampwatchmu    sync.Mutex
+	tstampwatch      map[streamKey]map[int64]int
 	totalQueued      int64
 	totalWritten     int64
 	totalInserts     int64
@@ -65,7 +67,21 @@ func NewDataWriter(collectionPrefix string, checkExisting bool, total int64) *da
 		checkExisting:    checkExisting,
 		bar:              pb.Full.Start(int(total)),
 		streams:          make(map[streamKey]*streamVal),
+		tstampwatch:      make(map[streamKey]map[int64]int),
 	}
+	// go func() {
+	// 	for {
+	// 		time.Sleep(5 * time.Second)
+	// 		rv.tstampwatchmu.Lock()
+	// 		for sk, m := range rv.tstampwatch {
+	// 			for ts, tv := range m {
+	// 				if tv > 2 {
+	// 					fmt.Printf("Stream %s:%s has timestamp %d duplicated %d times\n", sk.collection, sk.sertags, ts, tv)
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// }()
 	go rv.startWorkers()
 	return rv
 }
@@ -73,6 +89,14 @@ func NewDataWriter(collectionPrefix string, checkExisting bool, total int64) *da
 func (dw *dataWriter) Wait() {
 	<-dw.done
 	<-dw.bardone
+	dw.tstampwatchmu.Lock()
+	for sk, m := range dw.tstampwatch {
+		for ts, tv := range m {
+			if tv > 2 {
+				fmt.Printf("Stream %s:%s has timestamp %d duplicated %d times\n", sk.collection, sk.sertags, ts, tv)
+			}
+		}
+	}
 }
 
 func (dw *dataWriter) startWorkers() {
@@ -164,6 +188,7 @@ func (dw *dataWriter) getHandleFor(s plugins.Stream) *btrdb.Stream {
 	<-str.ready
 	return str.stream
 }
+
 func (dw *dataWriter) startSingleWorkerLoop() {
 	for {
 		stream, ok := <-dw.input
@@ -172,13 +197,40 @@ func (dw *dataWriter) startSingleWorkerLoop() {
 			return
 		}
 		dbstream := dw.getHandleFor(stream)
+		_ = dbstream
 		pts := stream.Next()
+		sk := streamKey{
+			collection: dw.collectionPrefix + stream.CollectionSuffix(),
+		}
+		sertags := []string{}
+		opttags := make(map[string]*string)
+		for k, v := range stream.Tags() {
+			sertags = append(sertags, fmt.Sprintf("%s=%s;", k, v))
+			lk := k
+			lv := v
+			opttags[lk] = &lv
+		}
+		sort.Strings(sertags)
+		sk.sertags = strings.Join(sertags, "")
+		dw.tstampwatchmu.Lock()
+		tsmap, ok := dw.tstampwatch[sk]
+		if !ok {
+			tsmap = make(map[int64]int)
+			dw.tstampwatch[sk] = tsmap
+		}
+		dw.tstampwatchmu.Unlock()
 		for len(pts) > 0 {
-			err := dbstream.InsertF(context.Background(), len(pts), func(i int) int64 {
+			/*err := dbstream.InsertF(context.Background(), len(pts), func(i int) int64 {
 				return pts[i].Time
 			}, func(i int) float64 {
 				return pts[i].Value
-			})
+			})*/
+			dw.tstampwatchmu.Lock()
+			for _, p := range pts {
+				tsmap[p.Time] += 1
+			}
+			dw.tstampwatchmu.Unlock()
+			var err error
 
 			dw.barmu.Lock()
 			dw.totalWritten += int64(len(pts))
