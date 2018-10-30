@@ -1,6 +1,6 @@
 #!/bin/bash
 echo "Invoking BTrDB Custom Postgres Script"
-set -ex
+set -e
 
 DATADIR=/var/lib/postgresql/data
 BACKUPDIR=/var/lib/postgresql/backups

@@ -203,6 +203,7 @@ echo "All containers built ok for $PFX$target_ver , pushing containers"
 docker push btrdb/${PFX}mrplotter:$target_ver
 docker push btrdb/${PFX}console:$target_ver
 docker push btrdb/${PFX}ingester:$target_ver
+docker push btrdb/${PFX}postgres:$target_ver
 docker push btrdb/${PFX}apifrontend:$target_ver
 docker push btrdb/${PFX}c37ingress:$target_ver
 docker push btrdb/${PFX}gepingress:$target_ver

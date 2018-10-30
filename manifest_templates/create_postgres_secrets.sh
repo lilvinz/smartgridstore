@@ -10,3 +10,4 @@ head -c 5000 /dev/urandom | md5sum | head -c 20 > ${TDIR}/pgpassword
 kubectl -n {{ .TargetNamespace }} create secret generic postgres-rpassword --from-file=${TDIR}/pgpassword
 
 rm ${TDIR}/pgpassword
+rmdir ${TDIR}
