@@ -164,6 +164,10 @@ cp ../../tools/ingester/ingester .
 docker build -t btrdb/${PFX}ingester:$target_ver .
 popd
 
+pushd $GOPATH/src/github.com/BTrDB/smartgridstore/containers/postgres
+docker build -t btrdb/${PFX}postgres:$target_ver .
+popd
+
 pushd $GOPATH/src/github.com/BTrDB/smartgridstore/containers/c37ingress
 cp ../../tools/c37ingress/c37ingress .
 docker build -t btrdb/${PFX}c37ingress:$target_ver .

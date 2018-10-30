@@ -28,6 +28,10 @@ var Manifest []*ManifestEntry = []*ManifestEntry{
 	&ManifestEntry{Yep, "pmu2btrdb.deployment.yaml", TemplateProcess("pmu2btrdb.deployment.yaml", "ingress")},
 	&ManifestEntry{Yep, "mrplotter.deployment.yaml", TemplateProcess("mrplotter.deployment.yaml", "core")},
 	&ManifestEntry{Yep, "secret_ceph_keyring.sh", TemplateProcess("secret_ceph_keyring.sh", "core")},
+	&ManifestEntry{Yep, "failover_postgres.sh", TemplateProcess("failover_postgres.sh", "recovery")},
+	&ManifestEntry{Yep, "postgresnewslave.daemonset.yaml", TemplateProcess("postgresnewslave.daemonset.yaml", "recovery")},
+	&ManifestEntry{Yep, "postgres.daemonset.yaml", TemplateProcess("postgres.daemonset.yaml", "core")},
+	&ManifestEntry{Yep, "create_postgres_secrets.yaml", TemplateProcess("create_postgres_secrets.sh", "core")},
 }
 
 func Yep(s *SiteConfig) bool {

@@ -8,7 +8,7 @@
   revision = "596e21fb2a6f0c61034f88a0b7e64df1d3a4a2a0"
 
 [[projects]]
-  branch = "master"
+  branch = "v5"
   name = "github.com/BTrDB/btrdb-server"
   packages = [
     "bte",
@@ -20,16 +20,16 @@
     "internal/mprovider",
     "internal/rez"
   ]
-  revision = "28e3df6c5766a3ceda98b23412479dcdd35c0784"
+  revision = "5e5c098b353fdff189f866c5191fa18a4cfb7b52"
 
 [[projects]]
-  branch = "master"
+  branch = "v5"
   name = "github.com/BTrDB/mr-plotter"
   packages = [
     "accounts",
     "keys"
   ]
-  revision = "68ef900b66a241b8190c9d21db169f5d95f9fbec"
+  revision = "9190348beb9aa176ef9af89a3dd33d1388ce6e6a"
 
 [[projects]]
   branch = "master"
@@ -549,6 +549,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "bda4028bbbfca06886d7f53e3c907b3d89f250a4c1eaf495b228cbcbda8945c6"
+  inputs-digest = "5556057a47a085f4aedd774a32c90a7fae91fe24241bb1f5db18855aab1f2c1e"
   solver-name = "gps-cdcl"
   solver-version = 1

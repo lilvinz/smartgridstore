@@ -1,0 +1,69 @@
+# {{ .GenLine }}
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: postgres-2
+  namespace: {{ .TargetNamespace }}
+spec:
+  selector:
+    matchLabels:
+      name: postgres-2
+  template:
+    metadata:
+      labels:
+        name: postgres-2
+        cluster: postgres
+        role: slave
+    spec:
+      nodeSelector:
+        "kubernetes.io/hostname": {{ index .SiteInfo.Metadata.Nodes 0 }}
+      containers:
+      - name: postgres
+        image: btrdb/{{.Pfx}}postgres:{{.TargetVersion}}
+        env:
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-password
+              key: pgpassword
+        - name: POSTGRES_RPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-rpassword
+              key: pgpassword
+        - name: ROLE
+          value: slave
+        - name: POSTGRES_MASTER
+          value: postgres-1
+        volumeMounts:
+        - name: backups
+          mountPath: /var/lib/postgresql/backups
+        - name: data
+          mountPath: /var/lib/postgresql/data
+        ports:
+        - containerPort: 5432
+          name: client
+          protocol: TCP
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: data
+        hostPath:
+          path: /var/lib/pg_{{ .TargetNamespace }}-2/data
+      - name: backups
+        hostPath:
+          path: /var/lib/pg_{{ .TargetNamespace }}-2/backups
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: postgres-2
+  namespace: {{ .TargetNamespace }}
+spec:
+  selector:
+    name: postgres-2
+  ports:
+  - protocol: TCP
+    port: 5432
+    targetPort: 5432
+---

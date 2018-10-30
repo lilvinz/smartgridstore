@@ -28,6 +28,9 @@ type SiteConfig struct {
 			Nodes   []string `yaml:"nodes"`
 			Version string   `yaml:"version"`
 		}
+		Metadata struct {
+			Nodes []string `yaml:"nodes"`
+		}
 		ExternalIPs []string `yaml:"externalIPs"`
 	} `yaml:"siteInfo"`
 }
@@ -72,6 +75,14 @@ siteInfo:
     # which version of etcd to deploy
     version: v3.3.5
 
+  metadata:
+    # which nodes should run SQL servers. There must be two entries
+    # here, so if you have fewer nodes, you can have duplicates. The
+    # node names must match the output from 'kubectl get nodes'
+    nodes:
+    - host0
+    - host1
+    
   # the external IPs listed here are where the services can be contacted
   # e.g for the plotter or the BTrDB API
   externalIPs:

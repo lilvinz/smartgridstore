@@ -1,0 +1,147 @@
+# {{ .GenLine }}
+kind: Service
+apiVersion: v1
+metadata:
+  name: postgres
+  namespace: {{ .TargetNamespace }}
+spec:
+  selector:
+    cluster: postgres
+    role: master
+  ports:
+  - protocol: TCP
+    port: 5432
+    targetPort: 5432
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: postgres-0
+  namespace: {{ .TargetNamespace }}
+spec:
+  selector:
+    matchLabels:
+      name: postgres-0
+  template:
+    metadata:
+      labels:
+        name: postgres-0
+        cluster: postgres
+        role: master
+    spec:
+      nodeSelector:
+        "kubernetes.io/hostname": {{ index .SiteInfo.Metadata.Nodes 0 }}
+      containers:
+      - name: postgres
+        image: btrdb/{{.Pfx}}postgres:{{.TargetVersion}}
+        env:
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-password
+              key: pgpassword
+        - name: POSTGRES_RPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-rpassword
+              key: pgpassword
+        - name: ROLE
+          value: master
+        volumeMounts:
+        - name: backups
+          mountPath: /var/lib/postgresql/backups
+        - name: data
+          mountPath: /var/lib/postgresql/data
+        ports:
+        - containerPort: 5432
+          name: client
+          protocol: TCP
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: data
+        hostPath:
+          path: /var/lib/pg_{{ .TargetNamespace }}-0/data
+      - name: backups
+        hostPath:
+          path: /var/lib/pg_{{ .TargetNamespace }}-0/backups
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: postgres-0
+  namespace: {{ .TargetNamespace }}
+spec:
+  selector:
+    name: postgres-0
+  ports:
+  - protocol: TCP
+    port: 5432
+    targetPort: 5432
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: postgres-1
+  namespace: {{ .TargetNamespace }}
+spec:
+  selector:
+    matchLabels:
+      name: postgres-1
+  template:
+    metadata:
+      labels:
+        name: postgres-1
+        cluster: postgres
+        role: slave
+    spec:
+      nodeSelector:
+        "kubernetes.io/hostname": {{ index .SiteInfo.Metadata.Nodes 1 }}
+      containers:
+      - name: postgres
+        image: btrdb/{{.Pfx}}postgres:{{.TargetVersion}}
+        env:
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-password
+              key: pgpassword
+        - name: POSTGRES_RPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-rpassword
+              key: pgpassword
+        - name: ROLE
+          value: slave
+        - name: POSTGRES_MASTER
+          value: postgres-0
+        volumeMounts:
+        - name: backups
+          mountPath: /var/lib/postgresql/backups
+        - name: data
+          mountPath: /var/lib/postgresql/data
+        ports:
+        - containerPort: 5432
+          name: client
+          protocol: TCP
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: data
+        hostPath:
+          path: /var/lib/pg_{{ .TargetNamespace }}-1/data
+      - name: backups
+        hostPath:
+          path: /var/lib/pg_{{ .TargetNamespace }}-1/backups
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: postgres-1
+  namespace: {{ .TargetNamespace }}
+spec:
+  selector:
+    name: postgres-1
+  ports:
+  - protocol: TCP
+    port: 5432
+    targetPort: 5432
+---

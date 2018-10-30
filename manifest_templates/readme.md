@@ -3,36 +3,33 @@
 The full documentation can be found on smartgrid.store, but here is the order
 you should create things:
 
-### global
-If this is the first time installing BTrDB on this k8s cluster (as opposed to
-having one already in a different namespace) then create global first
-```
-global/etcd.clusterrole.yaml
-```
-
 ### core
 
-Create the secrets first (you must also have done the PV provider). You need to
-have a storageclass called `etcd-backup-gce-pd` for the etcd operator to work.
+Create the secrets first
 
 Secrets:
 ```
-core/secret_ceph_keyring.sh
 core/create_admin_key.sh
+core/create_postgres_secret.sh
 ```
+
 Then do etcd:
 ```
-core/etcd.clusterrolebinding.yaml
-core/etcd.serviceaccount.yaml
-core/etcd-operator.deployment.yaml
-core/etcd.cluster.yaml
+core/etcd-cluster.daemonset.yaml
 ```
-Then wait for your three etcd pods to be up and running ok and do createdb:
+
+Then do the metadata database:
+```
+core/postgres.daemonset.yaml
+```
+
+After those five pods are up and running, you can then create the database:
 
 ```
 core/ensuredb.job.yaml
 ```
-Wait for that to finish okay and then do btrdb
+
+Wait for that to finish and then do btrdb
 
 ```
 core/btrdb.statefulset.yaml

@@ -27,11 +27,11 @@
 
 
 [[constraint]]
-  branch = "master"
+  branch = "v5"
   name = "github.com/BTrDB/mr-plotter"
 
 [[constraint]]
-  branch = "master"
+  branch = "v5"
   name = "github.com/BTrDB/btrdb-server"
 
 [[constraint]]
