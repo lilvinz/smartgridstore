@@ -48,7 +48,7 @@ fi
 
 #ensure we have the latest containers
 echo "[INFO] pulling containers"
-docker pull btrdb/cephdaemon 2>&1 | sed "s/^/[INFO][PULL] /"
+docker pull btrdb/cephdaemon:mimic 2>&1 | sed "s/^/[INFO][PULL] /"
 docker pull btrdb/stubetcd:latest 2>&1 | sed "s/^/[INFO][PULL] /"
 docker pull btrdb/${PREFIX}db:${VERSION} 2>&1 | sed "s/^/[INFO][PULL] /"
 docker pull btrdb/${PREFIX}apifrontend:${VERSION} 2>&1 | sed "s/^/[INFO][PULL] /"
@@ -61,7 +61,7 @@ OPUT=$(docker run -d --net ${DOCKERNET} --ip ${SUB24}.5 \
  -v ${OSDBASE}/var/lib/ceph/:/var/lib/ceph/ \
  -e MON_IP=${SUB24}.5 \
  -e CEPH_PUBLIC_NETWORK=${SUB24}.0/24 \
- btrdb/cephdaemon mon 2>&1)
+ btrdb/cephdaemon:mimic mon 2>&1)
 
 if [[ $? != 0 ]]
 then
@@ -105,7 +105,7 @@ OPUT=$(docker run -d --net ${DOCKERNET} --ip ${SUB24}.4 \
  -v ${OSDBASE}/var/lib/ceph/:/var/lib/ceph/ \
  -e MON_IP=${SUB24}.5 \
  -e CEPH_PUBLIC_NETWORK=${SUB24}.0/24 \
- btrdb/cephdaemon mgr 2>&1)
+ btrdb/cephdaemon:mimic mgr 2>&1)
 
 if [[ $? != 0 ]]
 then
@@ -131,7 +131,7 @@ do
    -v ${OSDBASE}/var/lib/ceph/bootstrap-osd:/var/lib/ceph/bootstrap-osd \
    ${PSTORAGEOPT} \
    -e OSD_TYPE=directory \
-   btrdb/cephdaemon osd 2>&1)
+   btrdb/cephdaemon:mimic osd 2>&1)
 
    if [[ $? != 0 ]]
    then
