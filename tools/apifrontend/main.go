@@ -275,7 +275,7 @@ func main() {
 		io.Copy(w, strings.NewReader(SwaggerJSON))
 	})
 	mux.HandleFunc("/v4/query", queryhandler)
-	gwmux := runtime.NewServeMux()
+	gwmux := runtime.NewServeMux(runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{OrigName: true, EmitDefaults: true}))
 	opts := []grpc.DialOption{grpc.WithInsecure()}
 	err := pb.RegisterBTrDBHandlerFromEndpoint(ctx, gwmux, "127.0.0.1:4410", opts)
 	if err != nil {
