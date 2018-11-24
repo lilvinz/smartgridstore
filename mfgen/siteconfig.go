@@ -3,6 +3,7 @@ package main
 import (
 	"io/ioutil"
 	"path"
+	"strings"
 
 	yaml "gopkg.in/yaml.v2"
 )
@@ -82,7 +83,7 @@ siteInfo:
     nodes:
     - host0
     - host1
-    
+
   # the external IPs listed here are where the services can be contacted
   # e.g for the plotter or the BTrDB API
   externalIPs:
@@ -116,6 +117,9 @@ func LoadSiteConfigArray(arr []byte) (*SiteConfig, error) {
 
 func (sc *SiteConfig) TargetVersion() string {
 	return PackageVersion
+}
+func (sc *SiteConfig) HyphenTargetVersion() string {
+	return strings.Replace(PackageVersion, ".", "-", -1)
 }
 func (sc *SiteConfig) Pfx() string {
 	if sc.Containers.Channel == "release" {

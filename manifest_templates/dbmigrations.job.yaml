@@ -1,0 +1,41 @@
+# {{ .GenLine }}
+# this creates or  upgrades the metadata database schema to that required
+# by the new version. It is safe to run multiple times, and you do not need
+# to run the intermediate versions
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: btrdb-dbmigrate-{{.HyphenTargetVersion}}
+  namespace: {{.TargetNamespace}}
+spec:
+  template:
+    metadata:
+      name: btrdb-dbmigrate-{{.HyphenTargetVersion}}
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: btrdb-dbmigrate
+        image: btrdb/{{.Pfx}}dbmigrate:{{.TargetVersion}}
+        imagePullPolicy: {{.Containers.ImagePullPolicy}}
+        env:
+          - name: POSTGRES_ENDPOINT
+            value: postgres
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: postgres-root-password
+                key: pgpassword
+          - name: POSTGRES_USER_R_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: postgres-read-password
+                key: pgpassword
+          - name: POSTGRES_USER_RW_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: postgres-readwrite-password
+                key: pgpassword
+          - name: MY_POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name

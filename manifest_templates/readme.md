@@ -23,7 +23,13 @@ Then do the metadata database:
 core/postgres.daemonset.yaml
 ```
 
-After those five pods are up and running, you can then create the database:
+Then set up the metadata database schema (or upgrade it from a previous version):
+```
+core/dbmigrations.job.yaml
+```
+
+After those five pods are up and running, and you have run the migrations job,
+you can then create the database:
 
 ```
 core/ensuredb.job.yaml

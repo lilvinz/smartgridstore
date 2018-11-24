@@ -26,6 +26,23 @@ spec:
             value: {{.SiteInfo.Ceph.BTrDBDataPool}}
           - name: CEPH_CONFIG
             value: {{.SiteInfo.Ceph.ConfigFile}}
+          - name: POSTGRES_ENDPOINT
+            value: postgres
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: postgres-root-password
+                key: pgpassword
+          - name: POSTGRES_USER_R_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: postgres-read-password
+                key: pgpassword
+          - name: POSTGRES_USER_RW_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: postgres-readwrite-password
+                key: pgpassword
           - name: MY_POD_NAME
             valueFrom:
               fieldRef:

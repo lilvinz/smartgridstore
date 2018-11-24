@@ -65,7 +65,7 @@ func (gep *GEPIngress) HandleDevice(ctx context.Context, descriptor string) erro
 	expression := afterAtParts[1]
 	//Special case to make common device descriptor cleaner
 	if expression == "*" {
-		expression = "FILTER ActiveMeasurements WHERE SignalID LIKE '%'"
+		expression = "FILTER ActiveMeasurements WHERE ID IS NOT NULL"
 	}
 
 	device := &GEPDevice{

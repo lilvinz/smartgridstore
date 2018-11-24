@@ -32,6 +32,7 @@ var Manifest []*ManifestEntry = []*ManifestEntry{
 	&ManifestEntry{Yep, "postgresnewslave.daemonset.yaml", TemplateProcess("postgresnewslave.daemonset.yaml", "recovery")},
 	&ManifestEntry{Yep, "postgres.daemonset.yaml", TemplateProcess("postgres.daemonset.yaml", "core")},
 	&ManifestEntry{Yep, "create_postgres_secrets.yaml", TemplateProcess("create_postgres_secrets.sh", "core")},
+	&ManifestEntry{Yep, "dbmigrations.job.yaml", TemplateProcess("dbmigrations.job.yaml", "core")},
 }
 
 func Yep(s *SiteConfig) bool {

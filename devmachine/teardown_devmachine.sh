@@ -65,6 +65,14 @@ else
   echo " DID NOT EXIST"
 fi
 
+echo "[INFO] removing container ${CONTAINER_PREFIX}postgres if exists"
+if docker rm -f ${CONTAINER_PREFIX}postgres >/dev/null 2>&1
+then
+  echo " DELETED"
+else
+  echo " DID NOT EXIST"
+fi
+
 echo "[INFO] removing network ${DOCKERNET} if exists"
 if docker network rm ${DOCKERNET} >/dev/null 2>&1
 then
@@ -79,5 +87,6 @@ rm -rf ${OSDBASE}/etc/*
 rm -rf ${OSDBASE}/var/*
 rm -rf ${OSDBASE}/osd*
 rm -rf ${ETCDBASE}/*
+rm -rf ${POSTGRESBASE}/*
 
 echo "[OKAY] all done here, have a great day!"

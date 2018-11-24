@@ -8,9 +8,11 @@ export DEVMACHINE_BASE=/srv/devmachine
 export OSDBASE=$DEVMACHINE_BASE/ceph
 # where to put the etcd data
 export ETCDBASE=$DEVMACHINE_BASE/etcd
+# where to put the postgres data
+export POSTGRESBASE=$DEVMACHINE_BASE/postgres
 
 # which version of BTrDB and tools to install
-export VERSION=4.15.5
+export VERSION=5.0.0
 
 # pick which branch to use
 #export PREFIX=""
@@ -48,3 +50,4 @@ export CONSOLE_PORT=2222
 export PATH=$PATH:$PWD/bin
 export ETCD_ENDPOINT=${SUB24}.20:2379
 export BTRDB_ENDPOINTS=${SUB24}.21:4410
+export POSTGRES_ENDPOINT=${SUB24}.28

@@ -52,6 +52,7 @@ docker pull btrdb/cephdaemon:mimic 2>&1 | sed "s/^/[INFO][PULL] /"
 docker pull btrdb/stubetcd:latest 2>&1 | sed "s/^/[INFO][PULL] /"
 docker pull btrdb/${PREFIX}db:${VERSION} 2>&1 | sed "s/^/[INFO][PULL] /"
 docker pull btrdb/${PREFIX}apifrontend:${VERSION} 2>&1 | sed "s/^/[INFO][PULL] /"
+# TODO pull postgres
 
 # all containers are gone, lets create new ones
 OPUT=$(docker run -d --net ${DOCKERNET} --ip ${SUB24}.5 \
@@ -201,6 +202,46 @@ else
   echo "[INFO] journal pool exists"
 fi
 
+# start the metadata database
+echo "[INFO] starting metadata database"
+OPUT=$(docker run -d \
+  --net ${DOCKERNET} \
+  --restart always \
+  --ip ${SUB24}.28 \
+  -p 5432:5432 \
+  --name ${CONTAINER_PREFIX}postgres \
+  -v ${POSTGRESBASE}/data:/var/lib/postgresql/data \
+  -v ${POSTGRESBASE}/backups:/var/lib/postgresql/backups \
+  -e POSTGRES_PASSWORD=devmachinepassword \
+  -e POSTGRES_RPASSWORD=devmachinerpassword \
+  -e ROLE=master \
+  btrdb/${PREFIX}postgres:${VERSION})
+
+if [[ $? != 0 ]]
+then
+  echo "[ABORT] Could not start metadata postgres"
+  echo $OPUT | sed "s/^/[FATAL ERROR] /"
+  exit 1
+fi
+
+# Set up the schema in the metadata database
+echo "[INFO] initializing metadata database"
+docker run -it \
+  --net ${DOCKERNET} \
+  --ip ${SUB24}.32 \
+  -e POSTGRES_PASSWORD=devmachinepassword \
+  -e POSTGRES_USER_R_PASSWORD=read \
+  -e POSTGRES_USER_RW_PASSWORD=rw \
+  -e POSTGRES_ENDPOINT=${POSTGRES_ENDPOINT} \
+  btrdb/${PREFIX}dbmigrate:${VERSION} | sed "s/^/[INFO][META DB INIT] /"
+
+if [[ $? != 0 ]]
+then
+  echo "[ABORT] Could not initialize metadata schema"
+  echo $OPUT | sed "s/^/[FATAL ERROR] /"
+  exit 1
+fi
+
 # run the btrdb ensuredb command
 echo "[INFO] checking database is initialized"
 docker run -it \
@@ -210,6 +251,9 @@ docker run -it \
   -e ETCD_ENDPOINT=http://${ETCD_ENDPOINT} \
   -e CEPH_HOT_POOL=${HOTPOOL} \
   -e CEPH_JOURNAL_POOL=${JOURNALPOOL} \
+  -e POSTGRES_ENDPOINT=${POSTGRES_ENDPOINT} \
+  -e POSTGRES_USER_R_PASSWORD=read \
+  -e POSTGRES_USER_RW_PASSWORD=rw \
   -e BTRDB_BLOCK_CACHE=62500 \
   -e CEPH_DATA_POOL=${COLDPOOL} \
   -e MY_POD_IP=${SUB24}.21 \
@@ -232,6 +276,9 @@ OPUT=$(docker run -d \
   -e CEPH_HOT_POOL=${HOTPOOL} \
   -e CEPH_JOURNAL_POOL=${JOURNALPOOL} \
   -e BTRDB_ENABLE_FAULT_INJECT=YES \
+  -e POSTGRES_ENDPOINT=${POSTGRES_ENDPOINT} \
+  -e POSTGRES_USER_R_PASSWORD=read \
+  -e POSTGRES_USER_RW_PASSWORD=rw \
   -e BTRDB_BLOCK_CACHE=62500 \
   -e BTRDB_ENABLE_OBLITERATE=YES \
   -e CEPH_DATA_POOL=${COLDPOOL} \
