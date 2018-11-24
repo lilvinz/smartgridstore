@@ -52,7 +52,7 @@ docker pull btrdb/cephdaemon:mimic 2>&1 | sed "s/^/[INFO][PULL] /"
 docker pull btrdb/stubetcd:latest 2>&1 | sed "s/^/[INFO][PULL] /"
 docker pull btrdb/${PREFIX}db:${VERSION} 2>&1 | sed "s/^/[INFO][PULL] /"
 docker pull btrdb/${PREFIX}apifrontend:${VERSION} 2>&1 | sed "s/^/[INFO][PULL] /"
-# TODO pull postgres
+docker pull btrdb/${PREFIX}postgres:${VERSION} 2>&1 | sed "s/^/[INFO][PULL] /"
 
 # all containers are gone, lets create new ones
 OPUT=$(docker run -d --net ${DOCKERNET} --ip ${SUB24}.5 \
